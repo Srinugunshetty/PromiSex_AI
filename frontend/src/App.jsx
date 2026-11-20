@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import Sidebar from './components/Sidebar';
 import Navbar from './components/Navbar';
 import Dashboard from './pages/Dashboard';
 import Module1_ProductIntelligence from './pages/Module1_ProductIntelligence';
@@ -31,10 +32,10 @@ import {
 } from './api/client';
 
 export default function App() {
-  // Theme state: defaults to dark or system preference, with light mode toggle
   const [theme, setTheme] = useState(() => localStorage.getItem('promisex_theme') || 'dark');
   const [activeTab, setActiveTab] = useState('dashboard');
   const [loading, setLoading] = useState(true);
+  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
 
   // Core Platform Data
   const [products, setProducts] = useState([]);
@@ -51,7 +52,7 @@ export default function App() {
   const [showUploadEvidenceModal, setShowUploadEvidenceModal] = useState(false);
   const [showDeliveryVerifyModal, setShowDeliveryVerifyModal] = useState(false);
 
-  // Notifications
+  // Notification Toast
   const [notification, setNotification] = useState(null);
 
   const notify = (message, type = 'success') => {
@@ -59,7 +60,6 @@ export default function App() {
     setTimeout(() => setNotification(null), 3500);
   };
 
-  // Sync theme to <html> tag
   useEffect(() => {
     if (theme === 'dark') {
       document.documentElement.classList.add('dark');
@@ -171,7 +171,7 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-[#0b0f17] text-slate-900 dark:text-slate-100 flex flex-col transition-colors">
+    <div className="min-h-screen bg-slate-50 dark:bg-[#0b0f17] text-slate-900 dark:text-slate-100 flex transition-colors">
       {/* Toast Notification */}
       {notification && (
         <div className="fixed bottom-5 right-5 z-50 bg-slate-900 dark:bg-white text-white dark:text-slate-900 px-4 py-2.5 rounded-lg shadow-lg flex items-center gap-2.5 text-xs font-medium transition-all">
@@ -184,78 +184,123 @@ export default function App() {
         </div>
       )}
 
-      {/* Institutional Top Navbar */}
-      <Navbar
-        activeTab={activeTab}
-        setActiveTab={setActiveTab}
-        theme={theme}
-        setTheme={setTheme}
-        onResetDemo={handleResetDemo}
-        onOpenNewProduct={() => setShowNewProductModal(true)}
-      />
+      {/* Desktop Left Sidebar (Modules Stacked on the Side) */}
+      <div className="hidden lg:block shrink-0">
+        <Sidebar
+          activeTab={activeTab}
+          setActiveTab={setActiveTab}
+          product={activeProduct}
+        />
+      </div>
 
-      {/* Main Workspace */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 py-6">
-        {activeTab === 'dashboard' && (
-          <Dashboard
-            product={activeProduct}
-            claims={claims}
-            evidenceDocs={evidenceDocs}
-            orders={orders}
-            discrepancies={discrepancies}
-            onNavigateTab={setActiveTab}
-            onOpenDiscrepancy={setSelectedDiscrepancy}
-          />
-        )}
+      {/* Mobile Drawer Sidebar */}
+      {mobileSidebarOpen && (
+        <div className="fixed inset-0 z-50 flex lg:hidden">
+          <div
+            className="fixed inset-0 bg-black/50 backdrop-blur-xs"
+            onClick={() => setMobileSidebarOpen(false)}
+          ></div>
+          <div className="relative z-10">
+            <Sidebar
+              activeTab={activeTab}
+              setActiveTab={(tab) => {
+                setActiveTab(tab);
+                setMobileSidebarOpen(false);
+              }}
+              product={activeProduct}
+            />
+          </div>
+        </div>
+      )}
 
-        {activeTab === 'product_intel' && (
-          <Module1_ProductIntelligence
-            product={activeProduct}
-            evidenceDocs={evidenceDocs}
-            onOpenNewProduct={() => setShowNewProductModal(true)}
-            onOpenUploadEvidence={() => setShowUploadEvidenceModal(true)}
-          />
-        )}
+      {/* Right Column: Top Bar + Active Module View + Footer */}
+      <div className="flex-1 flex flex-col min-w-0">
+        <Navbar
+          activeTab={activeTab}
+          theme={theme}
+          setTheme={setTheme}
+          onResetDemo={handleResetDemo}
+          onOpenNewProduct={() => setShowNewProductModal(true)}
+          onToggleMobileSidebar={() => setMobileSidebarOpen((prev) => !prev)}
+        />
 
-        {activeTab === 'extraction' && (
-          <Module2_PromiseExtraction
-            claims={claims}
-            onExtractClaims={handleExtractClaims}
-            onReloadData={() => loadAllData(activeProduct?.id)}
-          />
-        )}
+        {/* Main Content Workspace */}
+        <main className="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 py-6">
+          {activeTab === 'dashboard' && (
+            <Dashboard
+              product={activeProduct}
+              claims={claims}
+              evidenceDocs={evidenceDocs}
+              orders={orders}
+              discrepancies={discrepancies}
+              onNavigateTab={setActiveTab}
+              onOpenDiscrepancy={setSelectedDiscrepancy}
+            />
+          )}
 
-        {activeTab === 'graph' && <Module3_PromiseGraph graphData={graphData} />}
+          {activeTab === 'product_intel' && (
+            <Module1_ProductIntelligence
+              product={activeProduct}
+              evidenceDocs={evidenceDocs}
+              onOpenNewProduct={() => setShowNewProductModal(true)}
+              onOpenUploadEvidence={() => setShowUploadEvidenceModal(true)}
+            />
+          )}
 
-        {activeTab === 'evidence' && (
-          <Module4_EvidenceVerification
-            claims={claims}
-            evidenceDocs={evidenceDocs}
-            onRunReconciliation={handleRunReconciliation}
-            onOpenUploadEvidence={() => setShowUploadEvidenceModal(true)}
-          />
-        )}
+          {activeTab === 'extraction' && (
+            <Module2_PromiseExtraction
+              claims={claims}
+              onExtractClaims={handleExtractClaims}
+              onReloadData={() => loadAllData(activeProduct?.id)}
+            />
+          )}
 
-        {activeTab === 'delivery' && (
-          <Module5_DeliveryVerification
-            orders={orders}
-            discrepancies={discrepancies}
-            onOpenDeliveryVerifyModal={() => setShowDeliveryVerifyModal(true)}
-            onOpenDiscrepancy={setSelectedDiscrepancy}
-          />
-        )}
+          {activeTab === 'graph' && <Module3_PromiseGraph graphData={graphData} />}
 
-        {activeTab === 'discrepancy' && (
-          <Module6_DiscrepancyManagement
-            discrepancies={discrepancies}
-            onOpenDiscrepancy={setSelectedDiscrepancy}
-          />
-        )}
+          {activeTab === 'evidence' && (
+            <Module4_EvidenceVerification
+              claims={claims}
+              evidenceDocs={evidenceDocs}
+              onRunReconciliation={handleRunReconciliation}
+              onOpenUploadEvidence={() => setShowUploadEvidenceModal(true)}
+            />
+          )}
 
-        {activeTab === 'monitoring' && <Module7_PromiseMonitoring product={activeProduct} />}
+          {activeTab === 'delivery' && (
+            <Module5_DeliveryVerification
+              orders={orders}
+              discrepancies={discrepancies}
+              onOpenDeliveryVerifyModal={() => setShowDeliveryVerifyModal(true)}
+              onOpenDiscrepancy={setSelectedDiscrepancy}
+            />
+          )}
 
-        {activeTab === 'seller' && <Module8_SellerIntelligence />}
-      </main>
+          {activeTab === 'discrepancy' && (
+            <Module6_DiscrepancyManagement
+              discrepancies={discrepancies}
+              onOpenDiscrepancy={setSelectedDiscrepancy}
+            />
+          )}
+
+          {activeTab === 'monitoring' && <Module7_PromiseMonitoring product={activeProduct} />}
+
+          {activeTab === 'seller' && <Module8_SellerIntelligence />}
+        </main>
+
+        {/* Institutional Footer */}
+        <footer className="border-t border-slate-200 dark:border-slate-800/80 bg-white dark:bg-[#0c1017] py-4 text-xs text-slate-500 transition-colors">
+          <div className="max-w-6xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-2">
+            <p>© 2026 PROMISEX AI • Commercial Specification Verification Suite</p>
+            <div className="flex items-center gap-4 text-[11px]">
+              <span>FastAPI Backend 1.0.0</span>
+              <span>•</span>
+              <span>PromiseEvidence-1K Standard</span>
+              <span>•</span>
+              <span>Status: Connected</span>
+            </div>
+          </div>
+        </footer>
+      </div>
 
       {/* Modals */}
       {selectedDiscrepancy && (
@@ -288,20 +333,6 @@ export default function App() {
           onVerified={handleVerifyDelivery}
         />
       )}
-
-      {/* Institutional Enterprise Footer */}
-      <footer className="border-t border-slate-200 dark:border-slate-800/80 bg-white dark:bg-[#0c1017] py-4 text-xs text-slate-500 transition-colors">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-2">
-          <p>© 2026 PROMISEX AI Platform • Commercial Specification Verification Suite</p>
-          <div className="flex items-center gap-4 text-[11px]">
-            <span>FastAPI Backend 1.0.0</span>
-            <span>•</span>
-            <span>PromiseEvidence-1K Standard</span>
-            <span>•</span>
-            <span>Status: Connected</span>
-          </div>
-        </div>
-      </footer>
     </div>
   );
 }
