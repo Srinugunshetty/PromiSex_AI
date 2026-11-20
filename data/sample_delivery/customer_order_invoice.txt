@@ -1,0 +1,15 @@
+ORDER INVOICE & DELIVERY SPECIFICATION REPORT
+Order Number: PX-89421
+Customer Name: Sarah Jenkins
+Delivery Date: 2026-11-15
+Merchant: TechDirect Global
+Courier: FedGlobal Express (Tracking: FDX-99214028)
+
+PACKAGING BILL OF MATERIALS (BOM) & DIAGNOSTIC SCAN:
+Item 1: TechCorp UltraBook Pro 15 (SN: UP15-99482)
+- Installed Processor: Intel Core i7-13700H @ 2.40GHz (14 Cores) [CONFIRMED]
+- Installed Memory: 1x 8 GB DDR5 4800MHz Micron Single Module (Slot 2 EMPTY) [CRITICAL MISMATCH - 16 GB Dual-Channel Promised]
+- Installed Storage: 1 TB PCIe 4.0 NVMe SSD (Samsung PM9A1) [CONFIRMED]
+- Display Panel: 15.6" Samsung OLED 2.8K 120Hz [CONFIRMED]
+- Power Brick In Box: TechCorp 65W Standard Type-C Adapter (Model AD65W) [ACCESSORY MISMATCH - 100W GaN Promised]
+- Warranty Documentation: 1-Year Standard TechCorp Warranty Pamphlet. (No 2-Year VIP certificate enclosed).

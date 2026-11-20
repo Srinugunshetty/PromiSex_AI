@@ -1,0 +1,37 @@
+TechCorp UltraBook Pro 15 (Model UP15-2026-X)
+Official Manufacturer Engineering Specification Datasheet - Rev 2.4
+
+1. PROCESSOR & CHIPSET
+- CPU: 13th Gen Intel Core i7-13700H (14 Cores: 6 Performance + 8 Efficient, 20 Threads, Max Turbo Frequency up to 5.00 GHz, 24MB Intel Smart Cache, 45W Base TDP).
+- Architecture: Intel Raptor Lake AI Architecture.
+
+2. SYSTEM MEMORY & STORAGE
+- RAM: 16 GB DDR5 5200MHz Dual-Channel (2x 8GB SO-DIMM slots, user expandable to 64GB).
+- Storage: 1 TB PCIe 4.0 x4 M.2 NVMe SSD (Read up to 7,000 MB/s, Write up to 5,500 MB/s). Secondary M.2 2280 PCIe 4.0 slot available.
+
+3. DISPLAY SYSTEM
+- Screen Size: 15.6-inch Active Matrix OLED.
+- Resolution: 2.8K (2880 x 1800 pixels), 16:10 aspect ratio.
+- Refresh Rate: 120Hz VRR (Variable Refresh Rate).
+- Color Gamut: 100% DCI-P3 color coverage (Delta E < 1.0 calibrated), VESA DisplayHDR True Black 600 certified.
+
+4. GRAPHICS
+- Dedicated GPU: NVIDIA GeForce RTX 4060 Laptop GPU, 8GB GDDR6 VRAM, 105W Maximum Graphics Power with Dynamic Boost.
+
+5. POWER & BATTERY SUBSYSTEM
+- Battery Capacity: 75 Wh 4-Cell Lithium-Polymer.
+- Official Battery Benchmark: Tested under MobileMark 25 productivity test at 150 nits brightness: Maximum runtime reaches up to 8.5 Hours. Continuous web browsing battery runtime: 7.2 Hours. High-performance gaming/rendering runtime: 1.8 Hours.
+- In-Box Power Supply: Standard 65W USB Type-C Power Adapter (Input 100-240V). Note: Optional 100W GaN Quick Charger is sold separately as accessory SKU TC-ACC-100W.
+
+6. PORTS & CONNECTIVITY
+- I/O Ports: 2x Thunderbolt 4 Type-C (Supports DisplayPort 1.4, USB4 40Gbps, Power Delivery 3.0 up to 100W input), 2x USB 3.2 Gen 2 Type-A, 1x HDMI 2.1 FRL port, 1x 3.5mm combo audio jack, 1x MicroSD Express card reader.
+- Wireless: Intel Killer Wi-Fi 6E AX1675i (802.11ax 2x2 160MHz) + Bluetooth 5.3.
+
+7. MECHANICAL & CHASSIS
+- Construction: Precision CNC-machined 6000-series Anodized Aluminum Alloy unibody.
+- Dimensions: 356 x 248 x 17.9 mm. Weight: 1.88 kg.
+- Certification Notice: This consumer edition model has not undergone MIL-STD 810H military drop/shock certification. Military certification is restricted to Enterprise RuggedBook models.
+
+8. OPERATING SYSTEM & SECURITY
+- Pre-loaded OS: Windows 11 Pro 64-bit Edition with OEM digital license.
+- Camera: 1080p FHD IR camera with physical privacy shutter, Windows Hello facial biometric authentication.
