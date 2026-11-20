@@ -153,12 +153,21 @@ export default function App() {
   };
 
   const handleUpdateDiscrepancyStatus = async (reportId, status) => {
-    await updateDiscrepancyStatus(reportId, { status });
-    notify(`Dispute status updated: ${status}`);
-    if (selectedDiscrepancy) {
-      setSelectedDiscrepancy({ ...selectedDiscrepancy, status });
+    try {
+      const res = await updateDiscrepancyStatus(reportId, { status });
+      notify(`Dispute status updated: ${status}`);
+      if (res && res.report) {
+        setSelectedDiscrepancy(res.report);
+      } else if (selectedDiscrepancy) {
+        setSelectedDiscrepancy({ ...selectedDiscrepancy, status });
+      }
+      await loadAllData(activeProduct?.id);
+      return res;
+    } catch (err) {
+      console.error('Failed to update dispute status:', err);
+      notify('Failed to update dispute status on server', 'error');
+      throw err;
     }
-    await loadAllData(activeProduct?.id);
   };
 
   if (loading) {

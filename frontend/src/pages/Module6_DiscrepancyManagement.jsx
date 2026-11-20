@@ -92,14 +92,26 @@ export default function Module6_DiscrepancyManagement({
             </div>
 
             <div className="pt-4 border-t border-slate-200 dark:border-slate-850 flex items-center justify-between">
-              <div className="flex items-center gap-1.5 text-xs text-amber-600 dark:text-amber-400 font-medium">
-                <Clock className="w-3.5 h-3.5" />
-                <span>{rep.status}</span>
-              </div>
+              {rep.status?.includes('Resolved') ? (
+                <div className="flex items-center gap-1.5 text-xs text-emerald-600 dark:text-emerald-400 font-semibold bg-emerald-50 dark:bg-emerald-950/40 px-2.5 py-1 rounded-md border border-emerald-200 dark:border-emerald-800">
+                  <CheckCircle2 className="w-3.5 h-3.5" />
+                  <span>{rep.status}</span>
+                </div>
+              ) : rep.status?.includes('Arbitration') ? (
+                <div className="flex items-center gap-1.5 text-xs text-purple-600 dark:text-purple-400 font-semibold bg-purple-50 dark:bg-purple-950/40 px-2.5 py-1 rounded-md border border-purple-200 dark:border-purple-800">
+                  <AlertOctagon className="w-3.5 h-3.5" />
+                  <span>{rep.status}</span>
+                </div>
+              ) : (
+                <div className="flex items-center gap-1.5 text-xs text-amber-600 dark:text-amber-400 font-medium bg-amber-50 dark:bg-amber-950/40 px-2.5 py-1 rounded-md border border-amber-200 dark:border-amber-800">
+                  <Clock className="w-3.5 h-3.5" />
+                  <span>{rep.status}</span>
+                </div>
+              )}
 
               <button
                 onClick={() => onOpenDiscrepancy(rep)}
-                className="flex items-center gap-1 px-3 py-1.5 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-lg text-xs font-semibold shadow-xs"
+                className="flex items-center gap-1 px-3 py-1.5 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-lg text-xs font-semibold shadow-xs hover:opacity-90 transition-opacity"
               >
                 <span>Inspect Dossier</span>
                 <ArrowRight className="w-3.5 h-3.5" />

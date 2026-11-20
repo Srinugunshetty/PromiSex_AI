@@ -46,9 +46,19 @@ export default function Module5_DeliveryVerification({
                     <span className="font-mono text-xs font-bold text-blue-600 dark:text-blue-400">
                       ORDER #{order.order_id}
                     </span>
-                    <span className="text-[11px] px-2 py-0.5 rounded font-semibold bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-400 border border-rose-200 dark:border-rose-800">
-                      {order.status}
-                    </span>
+                    {order.status?.includes('Resolved') ? (
+                      <span className="text-[11px] px-2 py-0.5 rounded font-semibold bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800">
+                        ✓ {order.status}
+                      </span>
+                    ) : order.status?.includes('Arbitration') ? (
+                      <span className="text-[11px] px-2 py-0.5 rounded font-semibold bg-purple-50 dark:bg-purple-950/40 text-purple-700 dark:text-purple-400 border border-purple-200 dark:border-purple-800">
+                        ⚖ {order.status}
+                      </span>
+                    ) : (
+                      <span className="text-[11px] px-2 py-0.5 rounded font-semibold bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-400 border border-rose-200 dark:border-rose-800">
+                        {order.status}
+                      </span>
+                    )}
                   </div>
                   <h3 className="text-base font-bold text-slate-900 dark:text-slate-100 mt-1">
                     Customer Diagnostic Scan & Delivery Audit
