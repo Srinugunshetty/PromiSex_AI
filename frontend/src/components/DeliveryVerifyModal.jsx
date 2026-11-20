@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Truck, CheckCircle, AlertTriangle, FileSearch } from 'lucide-react';
+import { PackageCheck, X } from 'lucide-react';
 
 export default function DeliveryVerifyModal({ productId, onClose, onVerified }) {
   const [orderId, setOrderId] = useState('PX-89421');
@@ -39,97 +39,94 @@ export default function DeliveryVerifyModal({ productId, onClose, onVerified }) 
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto">
-      <div className="bg-slate-900 border border-slate-700/80 rounded-2xl max-w-xl w-full p-6 shadow-2xl space-y-5 text-slate-100 my-6">
-        <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+    <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto">
+      <div className="bg-white dark:bg-[#111726] border border-slate-200 dark:border-slate-800 rounded-xl max-w-xl w-full p-6 shadow-xl space-y-4 text-slate-900 dark:text-slate-100 my-6 transition-colors">
+        <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3">
           <div className="flex items-center gap-2.5">
-            <div className="p-2 bg-pink-500/20 text-pink-400 rounded-xl">
-              <Truck className="w-5 h-5" />
+            <div className="p-2 bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-400 rounded-lg border border-blue-200 dark:border-blue-900/60">
+              <PackageCheck className="w-5 h-5" />
             </div>
             <div>
-              <h3 className="font-bold text-lg text-slate-100">
-                Post-Purchase Delivery Verification
+              <h3 className="font-bold text-base text-slate-900 dark:text-slate-100">
+                Audit Delivered Merchandise
               </h3>
-              <p className="text-xs text-slate-400">
-                Compare customer unboxing diagnostics and invoice against seller commitments
+              <p className="text-xs text-slate-500">
+                Compare customer unboxing diagnostic telemetry against listing commitments
               </p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="text-slate-400 hover:text-slate-200 text-lg font-bold p-1 rounded-lg"
+            className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1"
           >
-            ✕
+            <X className="w-5 h-5" />
           </button>
         </div>
 
-        <div className="bg-pink-950/20 border border-pink-500/20 p-3 rounded-xl text-xs text-pink-300">
-          <strong>Jury Simulation Scenario:</strong> A customer received their laptop, but the hardware
-          diagnostics show only <strong>8GB RAM</strong> (promised 16GB) and a <strong>65W adapter</strong>{' '}
-          (promised 100W GaN). PROMISEX AI will verify and construct an evidence-backed dispute report.
+        <div className="bg-slate-50 dark:bg-slate-950 p-3 rounded-lg border border-slate-200 dark:border-slate-850 text-xs text-slate-600 dark:text-slate-400">
+          <strong>Audit Scenario:</strong> Customer delivery diagnostics report <strong>8 GB RAM</strong> (promised 16GB dual-channel) and a <strong>65W adapter</strong> (promised 100W GaN). PROMISEX will detect non-conformances and generate an evidence-backed dispute dossier.
         </div>
 
-        <form onSubmit={handleSimulate} className="space-y-4 text-xs">
+        <form onSubmit={handleSimulate} className="space-y-3.5 text-xs">
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-slate-400 mb-1 font-medium">Order Number</label>
+              <label className="block text-slate-600 dark:text-slate-400 mb-1 font-medium">Order Number</label>
               <input
                 type="text"
                 required
                 value={orderId}
                 onChange={(e) => setOrderId(e.target.value)}
-                className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-slate-200 font-mono"
+                className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded px-2.5 py-1.5 text-slate-900 dark:text-slate-100 font-mono"
               />
             </div>
             <div>
-              <label className="block text-slate-400 mb-1 font-medium">Customer Name</label>
+              <label className="block text-slate-600 dark:text-slate-400 mb-1 font-medium">Customer Recipient</label>
               <input
                 type="text"
                 required
                 value={customerName}
                 onChange={(e) => setCustomerName(e.target.value)}
-                className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-slate-200"
+                className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded px-2.5 py-1.5 text-slate-900 dark:text-slate-100"
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-slate-400 mb-1 font-medium">
-              Customer Invoice / Packaging BOM / Hardware Diagnostic Log
+            <label className="block text-slate-600 dark:text-slate-400 mb-1 font-medium">
+              Packaging Manifest / Hardware Diagnostic Log
             </label>
             <textarea
-              rows={6}
+              rows={5}
               value={invoiceText}
               onChange={(e) => setInvoiceText(e.target.value)}
-              className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-slate-200 font-mono text-xs focus:outline-none focus:border-pink-500"
+              className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded p-2.5 text-slate-900 dark:text-slate-100 font-mono text-xs focus:outline-none focus:border-blue-600"
             />
           </div>
 
           <div>
-            <label className="block text-slate-400 mb-1 font-medium">Customer Unboxing Notes</label>
+            <label className="block text-slate-600 dark:text-slate-400 mb-1 font-medium">Recipient Observation Notes</label>
             <input
               type="text"
               value={packageNotes}
               onChange={(e) => setPackageNotes(e.target.value)}
-              className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-slate-200"
+              className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded px-2.5 py-1.5 text-slate-900 dark:text-slate-100"
             />
           </div>
 
-          <div className="flex justify-end gap-2 pt-2 border-t border-slate-800">
+          <div className="flex justify-end gap-2 pt-2 border-t border-slate-200 dark:border-slate-800">
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl font-medium"
+              className="px-3.5 py-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-300 rounded font-medium"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={isVerifying}
-              className="flex items-center gap-1.5 px-5 py-2 bg-pink-600 hover:bg-pink-500 text-white rounded-xl font-semibold transition-all disabled:opacity-50"
+              className="px-4 py-1.5 bg-blue-600 hover:bg-blue-500 text-white rounded font-medium shadow-xs disabled:opacity-50"
             >
-              <FileSearch className="w-4 h-4" />
-              {isVerifying ? 'Analyzing Discrepancies...' : 'Run Delivery Verification'}
+              {isVerifying ? 'Analyzing...' : 'Execute Audit'}
             </button>
           </div>
         </form>

@@ -31,6 +31,15 @@ export async function extractClaims(productId) {
   return res.json();
 }
 
+export async function updateClaimStatus(claimId, payload) {
+  const res = await fetch(`${API_BASE}/claims/${claimId}/status`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
+  return res.json();
+}
+
 export async function fetchProductEvidence(productId) {
   const res = await fetch(`${API_BASE}/products/${productId}/evidence`);
   return res.json();
@@ -101,6 +110,30 @@ export async function fetchSellers() {
 
 export async function fetchSellerDetail(sellerId) {
   const res = await fetch(`${API_BASE}/sellers/${sellerId}`);
+  return res.json();
+}
+
+export async function fetchMonitoringItems(productId) {
+  const url = productId ? `${API_BASE}/monitoring?product_id=${productId}` : `${API_BASE}/monitoring`;
+  const res = await fetch(url);
+  return res.json();
+}
+
+export async function createMonitoringItem(payload) {
+  const res = await fetch(`${API_BASE}/monitoring`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
+  return res.json();
+}
+
+export async function updateMonitoringItem(itemId, payload) {
+  const res = await fetch(`${API_BASE}/monitoring/${itemId}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
   return res.json();
 }
 

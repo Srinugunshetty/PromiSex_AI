@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { UploadCloud, FileText, CheckCircle } from 'lucide-react';
+import { FileText, X } from 'lucide-react';
 
 export default function UploadEvidenceModal({ productId, onClose, onSubmit }) {
   const [title, setTitle] = useState('');
@@ -32,7 +32,7 @@ export default function UploadEvidenceModal({ productId, onClose, onSubmit }) {
   };
 
   const handlePreloadSpec = () => {
-    setTitle('TechCorp Official Hardware Engineering Spec (Rev 2.4)');
+    setTitle('TechCorp Official Engineering Spec Sheet (Rev 2.4)');
     setDocType('manufacturer_spec');
     setTextContent(`TechCorp UP15 Official Engineering Specification Sheet:
 1. PROCESSOR: Intel Core i7-13700H (14 cores: 6P+8E, up to 5.0GHz, 45W TDP).
@@ -45,106 +45,107 @@ export default function UploadEvidenceModal({ productId, onClose, onSubmit }) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto">
-      <div className="bg-slate-900 border border-slate-700/80 rounded-2xl max-w-xl w-full p-6 shadow-2xl space-y-5 text-slate-100 my-6">
-        <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+    <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto">
+      <div className="bg-white dark:bg-[#111726] border border-slate-200 dark:border-slate-800 rounded-xl max-w-xl w-full p-6 shadow-xl space-y-4 text-slate-900 dark:text-slate-100 my-6 transition-colors">
+        <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3">
           <div className="flex items-center gap-2.5">
-            <div className="p-2 bg-sky-500/20 text-sky-400 rounded-xl">
-              <UploadCloud className="w-5 h-5" />
+            <div className="p-2 bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-400 rounded-lg border border-blue-200 dark:border-blue-900/60">
+              <FileText className="w-5 h-5" />
             </div>
             <div>
-              <h3 className="font-bold text-lg text-slate-100">Upload Evidence Document</h3>
-              <p className="text-xs text-slate-400">
-                Provide manufacturer datasheets, warranty contracts, or lab benchmarks
+              <h3 className="font-bold text-base text-slate-900 dark:text-slate-100">
+                Ingest Manufacturer Evidence Document
+              </h3>
+              <p className="text-xs text-slate-500">
+                Indexes datasheets or warranty policies for automated semantic reconciliation
               </p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="text-slate-400 hover:text-slate-200 text-lg font-bold p-1 rounded-lg"
+            className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1"
           >
-            ✕
+            <X className="w-5 h-5" />
           </button>
         </div>
 
-        <div className="flex justify-between items-center bg-sky-950/20 border border-sky-500/20 p-3 rounded-xl text-xs">
-          <span className="text-sky-300">Testing? Pre-load the official TechCorp Spec Sheet</span>
+        <div className="flex justify-between items-center bg-slate-50 dark:bg-slate-950 p-2.5 rounded-lg border border-slate-200 dark:border-slate-850 text-xs">
+          <span className="text-slate-600 dark:text-slate-400">Testing? Pre-load the official TechCorp Spec Sheet</span>
           <button
             type="button"
             onClick={handlePreloadSpec}
-            className="px-3 py-1 bg-sky-600 hover:bg-sky-500 text-white rounded-lg font-medium transition-colors"
+            className="px-2.5 py-1 bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 text-slate-800 dark:text-slate-200 rounded font-medium"
           >
             Preload Spec
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4 text-xs">
+        <form onSubmit={handleSubmit} className="space-y-3.5 text-xs">
           <div>
-            <label className="block text-slate-400 mb-1 font-medium">Document Title *</label>
+            <label className="block text-slate-600 dark:text-slate-400 mb-1 font-medium">Document Title *</label>
             <input
               type="text"
               required
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="e.g. Official Manufacturer Technical Datasheet"
-              className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-slate-200 focus:outline-none focus:border-sky-500"
+              className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded px-2.5 py-1.5 text-slate-900 dark:text-slate-100 focus:outline-none focus:border-blue-600"
             />
           </div>
 
           <div>
-            <label className="block text-slate-400 mb-1 font-medium">Document Type</label>
+            <label className="block text-slate-600 dark:text-slate-400 mb-1 font-medium">Document Type</label>
             <select
               value={docType}
               onChange={(e) => setDocType(e.target.value)}
-              className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-slate-200 focus:outline-none focus:border-sky-500"
+              className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded px-2.5 py-1.5 text-slate-900 dark:text-slate-100 focus:outline-none focus:border-blue-600"
             >
               <option value="manufacturer_spec">Official Manufacturer Spec Sheet</option>
               <option value="warranty_policy">Warranty Policy & Legal Terms</option>
               <option value="benchmark_report">Independent Benchmark / Lab Test</option>
-              <option value="regulatory_filing">FCC / Regulatory Safety Filing</option>
+              <option value="regulatory_filing">Regulatory Safety Filing</option>
             </select>
           </div>
 
           <div>
-            <label className="block text-slate-400 mb-1 font-medium">
+            <label className="block text-slate-600 dark:text-slate-400 mb-1 font-medium">
               Upload PDF or Text File (Optional)
             </label>
             <input
               type="file"
               accept=".pdf,.txt,.md"
               onChange={(e) => setFile(e.target.files[0])}
-              className="w-full text-slate-400 file:mr-3 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-slate-800 file:text-sky-400 hover:file:bg-slate-700 cursor-pointer"
+              className="w-full text-slate-600 dark:text-slate-400 file:mr-3 file:py-1 file:px-2.5 file:rounded file:border-0 file:text-xs file:font-semibold file:bg-slate-200 dark:file:bg-slate-800 file:text-slate-800 dark:file:text-slate-200 cursor-pointer"
             />
           </div>
 
           <div>
-            <label className="block text-slate-400 mb-1 font-medium">
+            <label className="block text-slate-600 dark:text-slate-400 mb-1 font-medium">
               Document Text Content / Extracted Sections
             </label>
             <textarea
-              rows={6}
+              rows={5}
               value={textContent}
               onChange={(e) => setTextContent(e.target.value)}
-              placeholder="Paste official specification text, battery benchmark tables, or warranty clauses..."
-              className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-slate-200 focus:outline-none focus:border-sky-500 font-mono text-xs"
+              placeholder="Paste official technical specification clauses..."
+              className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded p-2.5 text-slate-900 dark:text-slate-100 focus:outline-none focus:border-blue-600 font-mono text-xs"
             />
           </div>
 
-          <div className="flex justify-end gap-2 pt-2 border-t border-slate-800">
+          <div className="flex justify-end gap-2 pt-2 border-t border-slate-200 dark:border-slate-800">
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl font-medium"
+              className="px-3.5 py-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-300 rounded font-medium"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={isSubmitting}
-              className="flex items-center gap-1.5 px-5 py-2 bg-sky-600 hover:bg-sky-500 text-white rounded-xl font-semibold transition-all disabled:opacity-50"
+              className="px-4 py-1.5 bg-blue-600 hover:bg-blue-500 text-white rounded font-medium shadow-xs disabled:opacity-50"
             >
-              <FileText className="w-4 h-4" />
-              {isSubmitting ? 'Registering Document...' : 'Ingest Evidence'}
+              {isSubmitting ? 'Ingesting...' : 'Ingest Document'}
             </button>
           </div>
         </form>

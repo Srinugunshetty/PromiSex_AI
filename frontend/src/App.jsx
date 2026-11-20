@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import Navbar from './components/Navbar';
 import Dashboard from './pages/Dashboard';
-import JuryDemoPage from './pages/JuryDemoPage';
-import ProductClaimsPage from './pages/ProductClaimsPage';
-import EvidenceReconciliationPage from './pages/EvidenceReconciliationPage';
-import PromiseGraphPage from './pages/PromiseGraphPage';
-import DeliveryPage from './pages/DeliveryPage';
-import DiscrepanciesPage from './pages/DiscrepanciesPage';
-import SellerIntelligencePage from './pages/SellerIntelligencePage';
+import Module1_ProductIntelligence from './pages/Module1_ProductIntelligence';
+import Module2_PromiseExtraction from './pages/Module2_PromiseExtraction';
+import Module3_PromiseGraph from './pages/Module3_PromiseGraph';
+import Module4_EvidenceVerification from './pages/Module4_EvidenceVerification';
+import Module5_DeliveryVerification from './pages/Module5_DeliveryVerification';
+import Module6_DiscrepancyManagement from './pages/Module6_DiscrepancyManagement';
+import Module7_PromiseMonitoring from './pages/Module7_PromiseMonitoring';
+import Module8_SellerIntelligence from './pages/Module8_SellerIntelligence';
 
 import DiscrepancyModal from './components/DiscrepancyModal';
 import NewProductModal from './components/NewProductModal';
@@ -19,7 +20,6 @@ import {
   fetchProductDetail,
   extractClaims,
   runReconciliation,
-  fetchProductEvidence,
   uploadEvidenceDoc,
   fetchPromiseGraph,
   verifyDelivery,
@@ -31,10 +31,12 @@ import {
 } from './api/client';
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState('jury');
+  // Theme state: defaults to dark or system preference, with light mode toggle
+  const [theme, setTheme] = useState(() => localStorage.getItem('promisex_theme') || 'dark');
+  const [activeTab, setActiveTab] = useState('dashboard');
   const [loading, setLoading] = useState(true);
 
-  // Core Data
+  // Core Platform Data
   const [products, setProducts] = useState([]);
   const [activeProduct, setActiveProduct] = useState(null);
   const [claims, setClaims] = useState([]);
@@ -49,13 +51,23 @@ export default function App() {
   const [showUploadEvidenceModal, setShowUploadEvidenceModal] = useState(false);
   const [showDeliveryVerifyModal, setShowDeliveryVerifyModal] = useState(false);
 
-  // Toast Notification
-  const [toast, setToast] = useState(null);
+  // Notifications
+  const [notification, setNotification] = useState(null);
 
-  const showToast = (message, type = 'success') => {
-    setToast({ message, type });
-    setTimeout(() => setToast(null), 4000);
+  const notify = (message, type = 'success') => {
+    setNotification({ message, type });
+    setTimeout(() => setNotification(null), 3500);
   };
+
+  // Sync theme to <html> tag
+  useEffect(() => {
+    if (theme === 'dark') {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+    localStorage.setItem('promisex_theme', theme);
+  }, [theme]);
 
   const loadAllData = async (productId) => {
     try {
@@ -78,7 +90,7 @@ export default function App() {
       setGraphData(gData || { nodes: [], edges: [] });
     } catch (err) {
       console.error('Error loading data:', err);
-      showToast('Error connecting to PROMISEX AI backend', 'error');
+      notify('Connection failed to PROMISEX backend service', 'error');
     } finally {
       setLoading(false);
     }
@@ -92,9 +104,9 @@ export default function App() {
     try {
       await resetDemo();
       await loadAllData();
-      showToast('PROMISEX AI demo scenario reset to initial laptop listing state!');
+      notify('Baseline product scenario reinitialized.');
     } catch (err) {
-      showToast('Reset failed: ' + err.message, 'error');
+      notify('Reset failed: ' + err.message, 'error');
     }
   };
 
@@ -102,10 +114,10 @@ export default function App() {
     if (!activeProduct) return;
     try {
       const res = await runReconciliation(activeProduct.id);
-      showToast(res.message);
+      notify(res.message);
       await loadAllData(activeProduct.id);
     } catch (err) {
-      showToast('Reconciliation error: ' + err.message, 'error');
+      notify('Reconciliation error: ' + err.message, 'error');
     }
   };
 
@@ -113,36 +125,36 @@ export default function App() {
     if (!activeProduct) return;
     try {
       const res = await extractClaims(activeProduct.id);
-      showToast(res.message);
+      notify(res.message);
       await loadAllData(activeProduct.id);
     } catch (err) {
-      showToast('Claim extraction failed: ' + err.message, 'error');
+      notify('Claim extraction failed: ' + err.message, 'error');
     }
   };
 
   const handleCreateProduct = async (payload) => {
     const res = await createProduct(payload);
-    showToast('Listing created & claims parsed successfully!');
+    notify('Listing SKU registered and claims extracted.');
     await loadAllData(res.product_id);
-    setActiveTab('promises');
+    setActiveTab('product_intel');
   };
 
   const handleUploadEvidence = async (productId, formData) => {
     await uploadEvidenceDoc(productId, formData);
-    showToast('Evidence document ingested into RAG corpus!');
+    notify('Engineering specification sheet indexed.');
     await loadAllData(productId);
   };
 
   const handleVerifyDelivery = async (payload) => {
     const res = await verifyDelivery(payload);
-    showToast('Delivery verification completed! Discrepancy flagged.');
+    notify('Delivery audit completed. Specification breach flagged.');
     await loadAllData(payload.product_id);
     setSelectedDiscrepancy(res.discrepancy_report);
   };
 
   const handleUpdateDiscrepancyStatus = async (reportId, status) => {
     await updateDiscrepancyStatus(reportId, { status });
-    showToast(`Status updated to: ${status}`);
+    notify(`Dispute status updated: ${status}`);
     if (selectedDiscrepancy) {
       setSelectedDiscrepancy({ ...selectedDiscrepancy, status });
     }
@@ -151,51 +163,39 @@ export default function App() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center text-slate-300">
-        <div className="w-12 h-12 rounded-2xl border-4 border-indigo-500/20 border-t-indigo-500 animate-spin mb-4"></div>
-        <p className="font-semibold text-sm">Initializing PROMISEX AI Platform...</p>
+      <div className="min-h-screen bg-slate-50 dark:bg-[#0b0f17] flex flex-col items-center justify-center text-slate-600 dark:text-slate-400">
+        <div className="w-8 h-8 rounded-full border-2 border-slate-300 dark:border-slate-700 border-t-blue-600 animate-spin mb-3"></div>
+        <p className="text-xs font-medium">Connecting to PROMISEX Verification Service...</p>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans selection:bg-indigo-500 selection:text-white">
+    <div className="min-h-screen bg-slate-50 dark:bg-[#0b0f17] text-slate-900 dark:text-slate-100 flex flex-col transition-colors">
       {/* Toast Notification */}
-      {toast && (
-        <div className="fixed bottom-5 right-5 z-50 bg-slate-900 border border-slate-700 text-white px-4 py-3 rounded-2xl shadow-2xl flex items-center gap-3 animate-in fade-in slide-in-from-bottom duration-200">
+      {notification && (
+        <div className="fixed bottom-5 right-5 z-50 bg-slate-900 dark:bg-white text-white dark:text-slate-900 px-4 py-2.5 rounded-lg shadow-lg flex items-center gap-2.5 text-xs font-medium transition-all">
           <span
-            className={`w-2.5 h-2.5 rounded-full ${
-              toast.type === 'error' ? 'bg-rose-500' : 'bg-emerald-400'
+            className={`w-2 h-2 rounded-full ${
+              notification.type === 'error' ? 'bg-rose-500' : 'bg-emerald-400'
             }`}
           ></span>
-          <span className="text-xs font-medium">{toast.message}</span>
+          <span>{notification.message}</span>
         </div>
       )}
 
-      {/* Top Navigation */}
+      {/* Institutional Top Navbar */}
       <Navbar
         activeTab={activeTab}
         setActiveTab={setActiveTab}
+        theme={theme}
+        setTheme={setTheme}
         onResetDemo={handleResetDemo}
         onOpenNewProduct={() => setShowNewProductModal(true)}
       />
 
-      {/* Main Content Area */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {activeTab === 'jury' && (
-          <JuryDemoPage
-            product={activeProduct}
-            claims={claims}
-            evidenceDocs={evidenceDocs}
-            orders={orders}
-            discrepancies={discrepancies}
-            onRunReconciliation={handleRunReconciliation}
-            onVerifyDelivery={() => setShowDeliveryVerifyModal(true)}
-            onNavigateTab={setActiveTab}
-            onResetDemo={handleResetDemo}
-          />
-        )}
-
+      {/* Main Workspace */}
+      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 py-6">
         {activeTab === 'dashboard' && (
           <Dashboard
             product={activeProduct}
@@ -208,17 +208,27 @@ export default function App() {
           />
         )}
 
-        {activeTab === 'promises' && (
-          <ProductClaimsPage
+        {activeTab === 'product_intel' && (
+          <Module1_ProductIntelligence
             product={activeProduct}
-            claims={claims}
-            onExtractClaims={handleExtractClaims}
+            evidenceDocs={evidenceDocs}
+            onOpenNewProduct={() => setShowNewProductModal(true)}
+            onOpenUploadEvidence={() => setShowUploadEvidenceModal(true)}
           />
         )}
 
-        {activeTab === 'reconciliation' && (
-          <EvidenceReconciliationPage
-            product={activeProduct}
+        {activeTab === 'extraction' && (
+          <Module2_PromiseExtraction
+            claims={claims}
+            onExtractClaims={handleExtractClaims}
+            onReloadData={() => loadAllData(activeProduct?.id)}
+          />
+        )}
+
+        {activeTab === 'graph' && <Module3_PromiseGraph graphData={graphData} />}
+
+        {activeTab === 'evidence' && (
+          <Module4_EvidenceVerification
             claims={claims}
             evidenceDocs={evidenceDocs}
             onRunReconciliation={handleRunReconciliation}
@@ -226,15 +236,8 @@ export default function App() {
           />
         )}
 
-        {activeTab === 'graph' && (
-          <PromiseGraphPage
-            graphData={graphData}
-            onSelectNode={(node) => console.log('Selected node:', node)}
-          />
-        )}
-
         {activeTab === 'delivery' && (
-          <DeliveryPage
+          <Module5_DeliveryVerification
             orders={orders}
             discrepancies={discrepancies}
             onOpenDeliveryVerifyModal={() => setShowDeliveryVerifyModal(true)}
@@ -242,14 +245,16 @@ export default function App() {
           />
         )}
 
-        {activeTab === 'discrepancies' && (
-          <DiscrepanciesPage
+        {activeTab === 'discrepancy' && (
+          <Module6_DiscrepancyManagement
             discrepancies={discrepancies}
             onOpenDiscrepancy={setSelectedDiscrepancy}
           />
         )}
 
-        {activeTab === 'seller' && <SellerIntelligencePage />}
+        {activeTab === 'monitoring' && <Module7_PromiseMonitoring product={activeProduct} />}
+
+        {activeTab === 'seller' && <Module8_SellerIntelligence />}
       </main>
 
       {/* Modals */}
@@ -284,12 +289,18 @@ export default function App() {
         />
       )}
 
-      {/* Footer */}
-      <footer className="border-t border-slate-900 bg-slate-950 py-6 text-center text-xs text-slate-500">
-        <p>
-          PROMISEX AI • AI-Powered Product Promise Verification & Accountability Platform •
-          PromiseEvidence-1K Benchmark
-        </p>
+      {/* Institutional Enterprise Footer */}
+      <footer className="border-t border-slate-200 dark:border-slate-800/80 bg-white dark:bg-[#0c1017] py-4 text-xs text-slate-500 transition-colors">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-2">
+          <p>© 2026 PROMISEX AI Platform • Commercial Specification Verification Suite</p>
+          <div className="flex items-center gap-4 text-[11px]">
+            <span>FastAPI Backend 1.0.0</span>
+            <span>•</span>
+            <span>PromiseEvidence-1K Standard</span>
+            <span>•</span>
+            <span>Status: Connected</span>
+          </div>
+        </div>
       </footer>
     </div>
   );

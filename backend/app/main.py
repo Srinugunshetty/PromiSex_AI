@@ -7,7 +7,7 @@ from fastapi.responses import FileResponse
 from contextlib import asynccontextmanager
 from app.config import settings
 from app.seed_data import seed_database
-from app.routers import products, promises, evidence, graph, delivery, discrepancy, seller, demo
+from app.routers import products, promises, evidence, graph, delivery, discrepancy, seller, demo, monitoring
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -42,6 +42,7 @@ app.include_router(delivery.router, prefix="/api")
 app.include_router(discrepancy.router, prefix="/api")
 app.include_router(seller.router, prefix="/api")
 app.include_router(demo.router, prefix="/api")
+app.include_router(monitoring.router, prefix="/api")
 
 @app.get("/api/health")
 def health_check():

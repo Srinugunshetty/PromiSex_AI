@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { ZoomIn, ZoomOut, RotateCcw, Filter, Database, ShieldCheck, AlertCircle, FileText, ShoppingCart, User, Layers } from 'lucide-react';
+import { ZoomIn, ZoomOut, RotateCcw, Filter, Database, Layers, X } from 'lucide-react';
 import StatusBadge from './StatusBadge';
 
 export default function PromiseGraphView({ graphData, onSelectNode }) {
@@ -14,7 +14,6 @@ export default function PromiseGraphView({ graphData, onSelectNode }) {
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const [showCypherModal, setShowCypherModal] = useState(false);
 
-  // Position nodes radially or in layered clusters
   const [nodePositions, setNodePositions] = useState({});
 
   useEffect(() => {
@@ -35,38 +34,37 @@ export default function PromiseGraphView({ graphData, onSelectNode }) {
 
     // Seller to upper left
     const sellerNodes = graphData.nodes.filter((n) => n.type === 'seller');
-    sellerNodes.forEach((n, idx) => {
-      pos[n.id] = { x: centerX - 260, y: centerY - 140, ...n };
+    sellerNodes.forEach((n) => {
+      pos[n.id] = { x: centerX - 260, y: centerY - 130, ...n };
     });
 
     // Evidence docs to upper right
     const evidenceNodes = graphData.nodes.filter((n) => n.type === 'evidence');
     evidenceNodes.forEach((n, idx) => {
-      const angle = -0.3 + idx * 0.6;
       pos[n.id] = {
-        x: centerX + 270 + Math.cos(angle) * 40,
-        y: centerY - 140 + idx * 100,
+        x: centerX + 260,
+        y: centerY - 130 + idx * 90,
         ...n,
       };
     });
 
     // Orders to lower left
     const orderNodes = graphData.nodes.filter((n) => n.type === 'order');
-    orderNodes.forEach((n, idx) => {
-      pos[n.id] = { x: centerX - 260, y: centerY + 140, ...n };
+    orderNodes.forEach((n) => {
+      pos[n.id] = { x: centerX - 260, y: centerY + 130, ...n };
     });
 
     // Discrepancies to lower right
     const discrepancyNodes = graphData.nodes.filter((n) => n.type === 'discrepancy');
-    discrepancyNodes.forEach((n, idx) => {
-      pos[n.id] = { x: centerX + 260, y: centerY + 150, ...n };
+    discrepancyNodes.forEach((n) => {
+      pos[n.id] = { x: centerX + 260, y: centerY + 130, ...n };
     });
 
     // Claims in an elliptical orbit around center
     const claimNodes = graphData.nodes.filter((n) => n.type === 'claim');
     const totalClaims = claimNodes.length;
-    const radiusX = 230;
-    const radiusY = 170;
+    const radiusX = 220;
+    const radiusY = 160;
 
     claimNodes.forEach((n, idx) => {
       const angle = (idx / totalClaims) * 2 * Math.PI - Math.PI / 2;
@@ -80,7 +78,7 @@ export default function PromiseGraphView({ graphData, onSelectNode }) {
     setNodePositions(pos);
   }, [graphData]);
 
-  // Handle Canvas Drawing
+  // Handle Canvas Drawing with Dark / Light Mode detection
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -90,6 +88,8 @@ export default function PromiseGraphView({ graphData, onSelectNode }) {
     const width = canvas.width;
     const height = canvas.height;
 
+    const isDark = document.documentElement.classList.contains('dark');
+
     ctx.clearRect(0, 0, width, height);
 
     ctx.save();
@@ -97,11 +97,11 @@ export default function PromiseGraphView({ graphData, onSelectNode }) {
     ctx.scale(zoom, zoom);
 
     // Draw background grid dots
-    ctx.fillStyle = '#1e293b';
-    const gridSize = 30;
+    ctx.fillStyle = isDark ? '#1e293b' : '#e2e8f0';
+    const gridSize = 28;
     for (let x = -width; x < width * 2; x += gridSize) {
       for (let y = -height; y < height * 2; y += gridSize) {
-        ctx.fillRect(x, y, 1.5, 1.5);
+        ctx.fillRect(x, y, 1.2, 1.2);
       }
     }
 
@@ -110,7 +110,6 @@ export default function PromiseGraphView({ graphData, onSelectNode }) {
       return;
     }
 
-    // Filtered claim nodes
     const visibleNodeIds = new Set();
     Object.values(nodePositions).forEach((n) => {
       if (filterStatus === 'ALL') {
@@ -133,8 +132,10 @@ export default function PromiseGraphView({ graphData, onSelectNode }) {
         const isHighlighted =
           selectedNode && (selectedNode.id === src.id || selectedNode.id === tgt.id);
 
-        ctx.strokeStyle = isHighlighted ? '#38bdf8' : edge.color || '#334155';
-        ctx.lineWidth = isHighlighted ? 2.5 : 1.2;
+        ctx.strokeStyle = isHighlighted
+          ? (isDark ? '#38bdf8' : '#0284c7')
+          : (isDark ? '#334155' : '#cbd5e1');
+        ctx.lineWidth = isHighlighted ? 2 : 1;
 
         if (edge.style === 'dashed') {
           ctx.setLineDash([4, 4]);
@@ -148,8 +149,10 @@ export default function PromiseGraphView({ graphData, onSelectNode }) {
         if (zoom > 0.85) {
           const midX = (src.x + tgt.x) / 2;
           const midY = (src.y + tgt.y) / 2;
-          ctx.font = '10px Inter, sans-serif';
-          ctx.fillStyle = isHighlighted ? '#93c5fd' : '#64748b';
+          ctx.font = '9px -apple-system, sans-serif';
+          ctx.fillStyle = isHighlighted
+            ? (isDark ? '#93c5fd' : '#0284c7')
+            : (isDark ? '#64748b' : '#94a3b8');
           ctx.textAlign = 'center';
           ctx.fillText(edge.label || edge.relation, midX, midY - 3);
         }
@@ -163,35 +166,27 @@ export default function PromiseGraphView({ graphData, onSelectNode }) {
       if (!visibleNodeIds.has(node.id)) return;
 
       const isSelected = selectedNode && selectedNode.id === node.id;
-      const radius = isSelected ? node.size * 0.7 + 4 : node.size * 0.7;
-
-      // Glow effect for selected or contradicted nodes
-      if (isSelected || node.status === 'Contradicted') {
-        ctx.shadowColor = node.color || '#3b82f6';
-        ctx.shadowBlur = 15;
-      } else {
-        ctx.shadowBlur = 0;
-      }
+      const radius = isSelected ? node.size * 0.65 + 3 : node.size * 0.65;
 
       ctx.beginPath();
       ctx.arc(node.x, node.y, radius, 0, Math.PI * 2);
       ctx.fillStyle = node.color || '#475569';
       ctx.fill();
 
-      // Border ring
-      ctx.lineWidth = isSelected ? 3 : 1.5;
-      ctx.strokeStyle = isSelected ? '#ffffff' : '#0f172a';
+      // Node border
+      ctx.lineWidth = isSelected ? 2.5 : 1.5;
+      ctx.strokeStyle = isSelected ? '#ffffff' : (isDark ? '#0c1017' : '#ffffff');
       ctx.stroke();
-
-      ctx.shadowBlur = 0;
 
       // Node label
       ctx.font = isSelected
-        ? 'bold 11px Inter, sans-serif'
-        : '10px Inter, sans-serif';
-      ctx.fillStyle = isSelected ? '#ffffff' : '#e2e8f0';
+        ? 'bold 10px -apple-system, sans-serif'
+        : '10px -apple-system, sans-serif';
+      ctx.fillStyle = isDark
+        ? (isSelected ? '#ffffff' : '#e2e8f0')
+        : (isSelected ? '#0f172a' : '#334155');
       ctx.textAlign = 'center';
-      ctx.fillText(node.label, node.x, node.y + radius + 13);
+      ctx.fillText(node.label, node.x, node.y + radius + 12);
     });
 
     ctx.restore();
@@ -203,11 +198,10 @@ export default function PromiseGraphView({ graphData, onSelectNode }) {
     const mouseX = (e.clientX - rect.left - pan.x) / zoom;
     const mouseY = (e.clientY - rect.top - pan.y) / zoom;
 
-    // Check hit node
     let clickedNode = null;
     Object.values(nodePositions).forEach((node) => {
       const dist = Math.hypot(node.x - mouseX, node.y - mouseY);
-      if (dist <= node.size * 0.7 + 6) {
+      if (dist <= node.size * 0.65 + 6) {
         clickedNode = node;
       }
     });
@@ -241,78 +235,73 @@ export default function PromiseGraphView({ graphData, onSelectNode }) {
   };
 
   return (
-    <div className="relative bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-2xl flex flex-col h-[600px]">
+    <div className="relative bg-white dark:bg-[#111726] border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden shadow-xs flex flex-col h-[560px] transition-colors">
       {/* Controls Header */}
-      <div className="flex flex-wrap items-center justify-between px-4 py-3 bg-slate-950/80 border-b border-slate-800 backdrop-blur-md z-10 gap-3">
+      <div className="flex flex-wrap items-center justify-between px-4 py-2.5 bg-slate-50/80 dark:bg-[#0c1017]/80 border-b border-slate-200 dark:border-slate-800 backdrop-blur-xs z-10 gap-3">
         <div className="flex items-center gap-2">
-          <div className="p-1.5 bg-indigo-500/20 text-indigo-400 rounded-lg">
-            <Layers className="w-5 h-5" />
+          <div className="p-1 bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-400 rounded border border-blue-200 dark:border-blue-900/60">
+            <Layers className="w-4 h-4" />
           </div>
           <div>
-            <h3 className="text-sm font-semibold text-slate-100 flex items-center gap-2">
-              Promise Knowledge Graph
-              <span className="text-xs font-normal text-slate-400 px-2 py-0.5 rounded-full bg-slate-800">
-                {Object.keys(nodePositions).length} Entities
+            <h3 className="text-xs font-bold text-slate-900 dark:text-slate-100 flex items-center gap-1.5">
+              Promise Ontology Graph
+              <span className="text-[10px] font-mono text-slate-500 px-1.5 py-0.2 rounded bg-slate-200 dark:bg-slate-800">
+                {Object.keys(nodePositions).length} Nodes
               </span>
             </h3>
-            <p className="text-xs text-slate-400">
-              Interactive relationship network connecting products, claims, evidence, and orders
-            </p>
           </div>
         </div>
 
         {/* Filter Bar */}
         <div className="flex items-center gap-2">
-          <div className="flex items-center gap-1 bg-slate-800/80 p-1 rounded-xl text-xs">
-            <Filter className="w-3.5 h-3.5 text-slate-400 ml-1.5" />
-            {['ALL', 'Verified', 'Contradicted', 'Partially verified', 'Unverifiable'].map(
-              (st) => (
-                <button
-                  key={st}
-                  onClick={() => setFilterStatus(st)}
-                  className={`px-2 py-1 rounded-lg transition-all ${
-                    filterStatus === st
-                      ? 'bg-indigo-600 text-white font-medium shadow-sm'
-                      : 'text-slate-400 hover:text-slate-200'
-                  }`}
-                >
-                  {st === 'Partially verified' ? 'Partial' : st}
-                </button>
-              )
-            )}
+          <div className="flex items-center gap-1 bg-white dark:bg-slate-900 p-0.5 rounded-lg border border-slate-200 dark:border-slate-800 text-xs">
+            <Filter className="w-3 h-3 text-slate-400 ml-1.5" />
+            {['ALL', 'Verified', 'Contradicted', 'Partially verified', 'Unverifiable'].map((st) => (
+              <button
+                key={st}
+                onClick={() => setFilterStatus(st)}
+                className={`px-2 py-0.5 rounded text-[11px] font-medium transition-colors ${
+                  filterStatus === st
+                    ? 'bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900 shadow-xs'
+                    : 'text-slate-500 hover:text-slate-900 dark:hover:text-slate-100'
+                }`}
+              >
+                {st === 'Partially verified' ? 'Partial' : st}
+              </button>
+            ))}
           </div>
 
           {/* Zoom controls */}
-          <div className="flex items-center gap-1 bg-slate-800/80 p-1 rounded-xl">
+          <div className="flex items-center gap-0.5 bg-white dark:bg-slate-900 p-0.5 rounded-lg border border-slate-200 dark:border-slate-800">
             <button
-              onClick={() => setZoom((z) => Math.min(z + 0.15, 2.2))}
-              className="p-1 hover:bg-slate-700 text-slate-300 rounded-lg transition-colors"
+              onClick={() => setZoom((z) => Math.min(z + 0.15, 2.0))}
+              className="p-1 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 rounded"
               title="Zoom In"
             >
-              <ZoomIn className="w-4 h-4" />
+              <ZoomIn className="w-3.5 h-3.5" />
             </button>
             <button
               onClick={() => setZoom((z) => Math.max(z - 0.15, 0.4))}
-              className="p-1 hover:bg-slate-700 text-slate-300 rounded-lg transition-colors"
+              className="p-1 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 rounded"
               title="Zoom Out"
             >
-              <ZoomOut className="w-4 h-4" />
+              <ZoomOut className="w-3.5 h-3.5" />
             </button>
             <button
               onClick={resetView}
-              className="p-1 hover:bg-slate-700 text-slate-300 rounded-lg transition-colors"
-              title="Reset Canvas"
+              className="p-1 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 rounded"
+              title="Reset View"
             >
-              <RotateCcw className="w-4 h-4" />
+              <RotateCcw className="w-3.5 h-3.5" />
             </button>
           </div>
 
           <button
             onClick={() => setShowCypherModal(true)}
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-sky-500/10 hover:bg-sky-500/20 text-sky-400 border border-sky-500/30 rounded-xl text-xs font-medium transition-all"
+            className="flex items-center gap-1 px-2.5 py-1 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 rounded-lg text-xs font-medium"
           >
-            <Database className="w-3.5 h-3.5" />
-            Neo4j Cypher
+            <Database className="w-3 h-3 text-blue-600 dark:text-blue-400" />
+            <span>Cypher (Neo4j)</span>
           </button>
         </div>
       </div>
@@ -320,12 +309,12 @@ export default function PromiseGraphView({ graphData, onSelectNode }) {
       {/* Main Canvas View */}
       <div
         ref={containerRef}
-        className="relative flex-1 bg-slate-950 overflow-hidden cursor-grab active:cursor-grabbing"
+        className="relative flex-1 bg-slate-50/50 dark:bg-[#0c1017] overflow-hidden cursor-grab active:cursor-grabbing"
       >
         <canvas
           ref={canvasRef}
           width={920}
-          height={520}
+          height={500}
           onMouseDown={handleMouseDown}
           onMouseMove={handleMouseMove}
           onMouseUp={handleMouseUp}
@@ -333,63 +322,56 @@ export default function PromiseGraphView({ graphData, onSelectNode }) {
         />
 
         {/* Legend Overlay */}
-        <div className="absolute bottom-3 left-3 bg-slate-900/90 border border-slate-800/80 backdrop-blur-md rounded-xl p-2.5 text-xs text-slate-300 flex items-center gap-3 shadow-lg pointer-events-none">
-          <span className="font-semibold text-slate-400 uppercase tracking-wider text-[10px]">
-            Node Legend:
-          </span>
-          <div className="flex items-center gap-1.5">
-            <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 inline-block"></span>
-            Verified
+        <div className="absolute bottom-3 left-3 bg-white/90 dark:bg-[#111726]/90 border border-slate-200 dark:border-slate-800 backdrop-blur-xs rounded-lg px-3 py-1.5 text-[11px] text-slate-600 dark:text-slate-300 flex items-center gap-3 shadow-xs pointer-events-none">
+          <span className="font-semibold text-slate-400 uppercase text-[9px]">Legend:</span>
+          <div className="flex items-center gap-1">
+            <span className="w-2 h-2 rounded-full bg-emerald-500 inline-block"></span> Verified
           </div>
-          <div className="flex items-center gap-1.5">
-            <span className="w-2.5 h-2.5 rounded-full bg-rose-500 inline-block"></span>
-            Contradicted
+          <div className="flex items-center gap-1">
+            <span className="w-2 h-2 rounded-full bg-rose-500 inline-block"></span> Contradicted
           </div>
-          <div className="flex items-center gap-1.5">
-            <span className="w-2.5 h-2.5 rounded-full bg-amber-500 inline-block"></span>
-            Partial
+          <div className="flex items-center gap-1">
+            <span className="w-2 h-2 rounded-full bg-amber-500 inline-block"></span> Partial
           </div>
-          <div className="flex items-center gap-1.5">
-            <span className="w-2.5 h-2.5 rounded-full bg-purple-500 inline-block"></span>
-            Unverifiable
+          <div className="flex items-center gap-1">
+            <span className="w-2 h-2 rounded-full bg-purple-500 inline-block"></span> Unverifiable
           </div>
-          <div className="flex items-center gap-1.5">
-            <span className="w-2.5 h-2.5 rounded-full bg-sky-500 inline-block"></span>
-            Evidence Doc
+          <div className="flex items-center gap-1">
+            <span className="w-2 h-2 rounded-full bg-sky-500 inline-block"></span> Document
           </div>
         </div>
 
         {/* Selected Node Details Drawer */}
         {selectedNode && (
-          <div className="absolute top-4 right-4 w-80 bg-slate-900/95 border border-slate-700/80 backdrop-blur-xl rounded-2xl p-4 shadow-2xl animate-in fade-in slide-in-from-right duration-200">
-            <div className="flex items-start justify-between mb-2">
-              <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-md bg-slate-800 text-slate-300">
+          <div className="absolute top-3 right-3 w-76 bg-white dark:bg-[#111726] border border-slate-200 dark:border-slate-800 rounded-xl p-4 shadow-lg text-xs space-y-2">
+            <div className="flex items-start justify-between">
+              <span className="text-[10px] uppercase font-mono font-bold px-1.5 py-0.2 rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400">
                 {selectedNode.type} Entity
               </span>
               <button
                 onClick={() => setSelectedNode(null)}
-                className="text-slate-400 hover:text-slate-200 text-xs p-1"
+                className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
               >
-                ✕
+                <X className="w-3.5 h-3.5" />
               </button>
             </div>
 
-            <h4 className="font-semibold text-slate-100 text-sm mb-2">
+            <h4 className="font-bold text-slate-900 dark:text-slate-100 text-xs">
               {selectedNode.label}
             </h4>
 
             {selectedNode.status && (
-              <div className="mb-3">
-                <StatusBadge status={selectedNode.status} />
+              <div>
+                <StatusBadge status={selectedNode.status} size="sm" />
               </div>
             )}
 
             {selectedNode.metadata && (
-              <div className="space-y-2 text-xs text-slate-300 bg-slate-950/60 p-3 rounded-xl border border-slate-800/80">
+              <div className="space-y-1.5 p-2.5 bg-slate-50 dark:bg-slate-950 rounded-lg border border-slate-200 dark:border-slate-850 text-[11px]">
                 {selectedNode.metadata.category && (
                   <div>
-                    <span className="text-slate-500 block">Category</span>
-                    <span className="font-medium text-slate-200">
+                    <span className="text-slate-400 block text-[10px]">Category</span>
+                    <span className="font-medium text-slate-800 dark:text-slate-200">
                       {selectedNode.metadata.category}
                     </span>
                   </div>
@@ -397,8 +379,8 @@ export default function PromiseGraphView({ graphData, onSelectNode }) {
 
                 {selectedNode.metadata.claim_text && (
                   <div>
-                    <span className="text-slate-500 block">Promised Claim</span>
-                    <span className="text-slate-200 italic">
+                    <span className="text-slate-400 block text-[10px]">Promised Claim</span>
+                    <span className="text-slate-700 dark:text-slate-300 italic">
                       "{selectedNode.metadata.claim_text}"
                     </span>
                   </div>
@@ -406,8 +388,8 @@ export default function PromiseGraphView({ graphData, onSelectNode }) {
 
                 {selectedNode.metadata.verified_value && (
                   <div>
-                    <span className="text-slate-500 block">Reconciled Value</span>
-                    <span className="font-mono text-emerald-400">
+                    <span className="text-slate-400 block text-[10px]">Reconciled Value</span>
+                    <span className="font-mono text-rose-600 dark:text-rose-400 font-semibold">
                       {selectedNode.metadata.verified_value}
                     </span>
                   </div>
@@ -415,19 +397,10 @@ export default function PromiseGraphView({ graphData, onSelectNode }) {
 
                 {selectedNode.metadata.explanation && (
                   <div>
-                    <span className="text-slate-500 block">AI Verification Rationale</span>
-                    <p className="text-slate-300 mt-0.5 leading-relaxed">
+                    <span className="text-slate-400 block text-[10px]">Verification Rationale</span>
+                    <p className="text-slate-700 dark:text-slate-300 mt-0.5 leading-relaxed">
                       {selectedNode.metadata.explanation}
                     </p>
-                  </div>
-                )}
-
-                {selectedNode.metadata.confidence && (
-                  <div className="flex justify-between items-center pt-1 border-t border-slate-800">
-                    <span className="text-slate-500">Confidence Score</span>
-                    <span className="font-semibold text-indigo-400">
-                      {(selectedNode.metadata.confidence * 100).toFixed(0)}%
-                    </span>
                   </div>
                 )}
               </div>
@@ -436,29 +409,26 @@ export default function PromiseGraphView({ graphData, onSelectNode }) {
         )}
       </div>
 
-      {/* Cypher Export Modal */}
+      {/* Cypher Modal */}
       {showCypherModal && (
-        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-slate-900 border border-slate-700 rounded-2xl max-w-2xl w-full p-6 shadow-2xl space-y-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2 text-sky-400">
-                <Database className="w-5 h-5" />
-                <h3 className="font-bold text-lg text-slate-100">
-                  Export to Neo4j Knowledge Graph (Cypher)
-                </h3>
-              </div>
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-[#111726] border border-slate-200 dark:border-slate-800 rounded-xl max-w-xl w-full p-5 shadow-xl space-y-3 text-xs">
+            <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-2">
+              <h3 className="font-bold text-sm text-slate-900 dark:text-slate-100 flex items-center gap-1.5">
+                <Database className="w-4 h-4 text-blue-600" />
+                Neo4j Knowledge Graph (Cypher Export)
+              </h3>
               <button
                 onClick={() => setShowCypherModal(false)}
-                className="text-slate-400 hover:text-slate-200"
+                className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 font-bold"
               >
                 ✕
               </button>
             </div>
-            <p className="text-xs text-slate-400">
-              Run these Cypher statements in Neo4j Browser or AuraDB to materialize the PROMISEX
-              accountability graph:
+            <p className="text-slate-500 text-xs">
+              Execute these Cypher statements in Neo4j to materialize the PROMISEX ontology:
             </p>
-            <pre className="bg-slate-950 border border-slate-800 p-4 rounded-xl text-xs font-mono text-emerald-400 max-h-72 overflow-y-auto">
+            <pre className="p-3 bg-slate-50 dark:bg-slate-950 rounded-lg border border-slate-200 dark:border-slate-850 font-mono text-emerald-600 dark:text-emerald-400 max-h-60 overflow-y-auto leading-relaxed">
 {`// Nodes
 MERGE (p:Product {id: 'prod_ultrabook_15', name: 'UltraBook Pro 15'});
 MERGE (s:Seller {id: 'seller_techdirect', name: 'TechDirect Global'});
@@ -479,7 +449,7 @@ MERGE (e1)-[:SUPPORTS]->(c2);
 MERGE (o1)-[:PURCHASED]->(p);
 MERGE (o1)-[:TRIGGERED]->(d1);`}
             </pre>
-            <div className="flex justify-end gap-2">
+            <div className="flex justify-end gap-2 pt-2 border-t border-slate-200 dark:border-slate-800">
               <button
                 onClick={() => {
                   navigator.clipboard.writeText(
@@ -487,13 +457,13 @@ MERGE (o1)-[:TRIGGERED]->(d1);`}
                   );
                   alert('Cypher copied to clipboard!');
                 }}
-                className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-semibold"
+                className="px-3 py-1.5 bg-blue-600 hover:bg-blue-500 text-white rounded font-medium shadow-xs"
               >
                 Copy to Clipboard
               </button>
               <button
                 onClick={() => setShowCypherModal(false)}
-                className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-medium"
+                className="px-3 py-1.5 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded font-medium"
               >
                 Close
               </button>
