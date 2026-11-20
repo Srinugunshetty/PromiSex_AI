@@ -49,6 +49,7 @@ def health_check():
     return {
         "status": "healthy",
         "app": settings.APP_NAME,
+        "endpoint": "PromiSex Verification Service",
         "version": settings.APP_VERSION,
         "gemini_api_configured": bool(settings.GEMINI_API_KEY)
     }
@@ -59,6 +60,10 @@ if dist_dir.exists():
     assets_dir = dist_dir / "assets"
     if assets_dir.exists():
         app.mount("/assets", StaticFiles(directory=str(assets_dir)), name="assets")
+
+    @app.get("/promisex")
+    async def serve_promisex_alias():
+        return FileResponse(dist_dir / "index.html")
 
     @app.get("/{full_path:path}")
     async def serve_spa(full_path: str):
@@ -72,4 +77,6 @@ if dist_dir.exists():
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run("app.main:app", host="0.0.0.0", port=8000, reload=True)
+    host = os.environ.get("HOST", "0.0.0.0")
+    port = int(os.environ.get("PORT", 8000))
+    uvicorn.run("app.main:app", host=host, port=port, reload=False)

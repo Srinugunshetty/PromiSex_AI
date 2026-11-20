@@ -1,4 +1,5 @@
-const API_BASE = '/api';
+const rawApiBase = import.meta.env.VITE_API_URL || '/api';
+const API_BASE = rawApiBase.endsWith('/') ? rawApiBase.slice(0, -1) : rawApiBase;
 
 export async function fetchHealth() {
   const res = await fetch(`${API_BASE}/health`);

@@ -60,7 +60,7 @@ The frontend is pre-built into `frontend/dist` and served directly by FastAPI:
 # In project root:
 python backend/run.py
 ```
-Open your browser at: **[http://localhost:8000](http://localhost:8000)**
+Open your browser at: **[http://localhost:8000](http://localhost:8000)** (or `http://localhost:8000/promisex`)
 
 ### 3. (Optional) Run in Development Mode with Hot Reloading
 If you wish to modify backend or frontend code live:
@@ -77,6 +77,18 @@ cd frontend
 npm run dev
 ```
 Open your browser at: **[http://localhost:5173](http://localhost:5173)**
+
+---
+
+## 🌐 Cloud Deployment (PromiSex Production Endpoints)
+
+PROMISEX AI is configured for 1-click cloud deployment on **Render**, **Railway**, **Docker**, or **Vercel**:
+
+- **Render Blueprint**: Configured via [`render.yaml`](./render.yaml) for automatic free cloud hosting with HTTPS.
+- **Docker Multi-Stage**: Configured via [`Dockerfile`](./Dockerfile) & [`docker-compose.yml`](./docker-compose.yml).
+- **Heroku / Railway**: Configured via [`Procfile`](./Procfile).
+- **Custom Domains**: Seamless support for custom domain endpoints (e.g. `promisex.ai` or `app.yourdomain.com`).
+- **Complete Deployment Guide**: Read **[DEPLOYMENT.md](./DEPLOYMENT.md)** for step-by-step instructions.
 
 ---
 

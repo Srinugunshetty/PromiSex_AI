@@ -6,4 +6,8 @@ import sys
 sys.path.insert(0, os.path.abspath(os.path.dirname(__file__)))
 
 if __name__ == "__main__":
-    uvicorn.run("app.main:app", host="127.0.0.1", port=8000, reload=False)
+    host = os.environ.get("HOST", "0.0.0.0")
+    port = int(os.environ.get("PORT", 8000))
+    reload = os.environ.get("RELOAD", "false").lower() == "true"
+    print(f"[PROMISEX AI] Starting production server on {host}:{port}")
+    uvicorn.run("app.main:app", host=host, port=port, reload=reload)
